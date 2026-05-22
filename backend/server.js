@@ -126,7 +126,10 @@ app.post('/api/chat', async (req, res) => {
     const systemPrompt = loadPrompt('UC-1_Weekly_Opener.md') || "You are the SayItOnce Copilot Assistant.";
     
     // Inject instructions for structured JSON output
-    const jsonInstructions = `\n\nCRITICAL INSTRUCTION: You must respond in pure JSON matching this schema: {"reply": "Your conversational response", "readyForApproval": boolean}. Set readyForApproval to true ONLY if you have presented a complete numbered list of priorities and believe the CEO has no further edits.`;
+    const jsonInstructions = `\n\nCRITICAL INSTRUCTION: You must respond in pure JSON matching this schema exactly: {"reply": "Your conversational response", "readyForApproval": boolean}
+- readyForApproval must be false during the conversation.
+- Set readyForApproval to true ONLY when BOTH conditions are met: (1) you have shown a complete numbered priority list with owners and definitions of done, AND (2) the CEO has explicitly confirmed it — with words like "ok", "approved", "looks good", "yes", "zatwierdź", "tak", "wygląda dobrze", or equivalent.
+- Do NOT set readyForApproval to true based on your own judgment — wait for explicit CEO confirmation.`;
 
     const messages = [
         { role: 'system', content: `Company Profile Context:\n${db.companyProfile}\n\n${systemPrompt}${jsonInstructions}` },
