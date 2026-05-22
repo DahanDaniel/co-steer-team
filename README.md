@@ -46,10 +46,10 @@ This repo gives you the working reference implementation. The backend uses OpenA
 
 ## How it works
 
-The entire frontend lives in `index.html` — no build step, no framework. It makes plain HTTP calls to the backend.
+The frontend lives in the `frontend/` folder — `index.html`, `styles.css`, and `app.js`. No build step, no framework. It makes plain HTTP calls to the backend.
 
 The backend (`backend/server.js`) is a Node.js + Express server that:
-- Serves the static `index.html` at the root
+- Serves the static frontend files at the root
 - Stores state (company profile, generated briefs) in `backend/data/db.json` — auto-created on first run
 - Forwards chat messages to the OpenAI chat API
 - Transcribes audio via the Whisper API (`/api/transcribe`)
