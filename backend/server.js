@@ -43,6 +43,9 @@ const writeDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2
 
 initDB();
 
+// Serve frontend from repo root
+app.use(express.static(path.join(__dirname, '..')));
+
 // Setup Multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
@@ -71,6 +74,18 @@ app.post('/api/context/upload', upload.single('file'), (req, res) => {
 app.get('/api/context', (req, res) => {
     const db = readDB();
     res.json({ profile: db.companyProfile });
+});
+
+// API: Reset app state (for testing / fresh start)
+app.post('/api/reset', (req, res) => {
+    const defaultDb = {
+        companyProfile: null,
+        workingMemory: { currentWeekPlan: [], pendingTasks: [] },
+        artifacts: { leaderBriefs: [], teamBriefs: [] },
+        activityLog: []
+    };
+    writeDB(defaultDb);
+    res.json({ message: 'App state reset successfully' });
 });
 
 // API: Fetch Team Briefs

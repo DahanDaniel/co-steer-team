@@ -1,103 +1,181 @@
-# Co-Steer MVP
+# Co-Steer — Weekly Loop AI Copilot
 
-A conversational AI tool for CEOs to run their weekly steering loop.
+Co-Steer is a CEO dashboard that runs a structured weekly steering conversation with an AI Chief of Staff. You upload your company context, have a focused conversation about this week's priorities, approve a task list (with owners and deadlines), and get a team brief generated automatically. The whole flow is driven by a single HTML file talking to a small Node/Express backend.
 
-The assistant helps you open each week with clarity: extract priorities, define ownership, surface risks, and generate a team brief — all through a natural conversation.
-
----
-
-## What it does
-
-- **Weekly Opener** — AI-guided conversation to set the week's priorities
-- **Team Brief** — auto-generated brief ready to share with the team
-- **Company Context** — paste or upload your company profile once, it persists across sessions
-- **Voice Input** — speak instead of type (uses OpenAI Whisper)
+This repo gives you the working reference implementation. The backend uses OpenAI directly. If you want to plug in your own agents — you can. The section "Replacing the backend" below explains exactly what the frontend expects from the API.
 
 ---
 
-## Requirements
+## Quick start
 
-- [Node.js](https://nodejs.org/) v18 or higher
-- An OpenAI API key — get one at [platform.openai.com](https://platform.openai.com/api-keys)
+1. **Clone the repo**
 
----
+   ```bash
+   git clone https://github.com/DahanDaniel/co-steer-team.git
+   cd co-steer-team
+   ```
 
-## Setup
+   No git? Download the ZIP from GitHub (green "Code" button → Download ZIP), unzip, and open the folder in Terminal.
 
-### 1. Clone the repo
+2. **Create your `.env` file** inside the `backend/` folder
 
-```bash
-git clone https://github.com/DanielDahandahandahan/co-steer-team.git
-cd co-steer-team
-```
+   ```
+   OPENAI_API_KEY=sk-...your-key-here...
+   ```
 
-> If you don't have git, download the ZIP from GitHub (green "Code" button → Download ZIP), unzip it, and open the folder in Terminal.
+3. **Install dependencies**
 
-### 2. Add your OpenAI API key
+   ```bash
+   cd backend
+   npm install
+   ```
 
-In the root of the project, create a file called `.env`:
+4. **Start the server**
 
-```
-OPENAI_API_KEY=sk-...your-key-here...
-```
+   ```bash
+   node server.js
+   ```
 
-You can copy `.env.example` and fill in your key.
+   You should see: `Co-Steer MVP Backend running on http://localhost:3000`
 
-### 3. Install dependencies
+5. **Open the app**
 
-```bash
-cd backend
-npm install
-cd ..
-```
-
-### 4. Start the server
-
-```bash
-cd backend
-node server.js
-```
-
-You should see:
-
-```
-Co-Steer MVP Backend running on http://localhost:3000
-```
-
-### 5. Open the app
-
-Open `index.html` in your browser. You can do this by:
-- Double-clicking the file in Finder
-- Or dragging it into a browser window
-
-> The server must be running (step 4) for the AI chat to work.
+   Go to [http://localhost:3000](http://localhost:3000) in your browser. The server serves the UI — no need to open the HTML file directly.
 
 ---
 
-## How to use
+## How it works
 
-1. **Load company context** — In the *Data Sources* tab, paste a short description of your company (who you are, what you do, your team). This is used by the AI in every conversation.
+The entire frontend lives in `index.html` — no build step, no framework. It makes plain HTTP calls to the backend.
 
-2. **Start the weekly loop** — Click *Weekly Loop* in the *Workflows* tab, then click *Start Weekly Opener*. The AI will guide you through the week's priorities.
+The backend (`backend/server.js`) is a Node.js + Express server that:
+- Serves the static `index.html` at the root
+- Stores state (company profile, generated briefs) in `backend/data/db.json` — auto-created on first run
+- Forwards chat messages to the OpenAI chat API
+- Transcribes audio via the Whisper API (`/api/transcribe`)
 
-3. **Generate a team brief** — Once your priorities are confirmed, click *Generate Team Brief*. The brief appears in the *Objectives* tab.
+The flow:
 
-4. **Voice input** — Click the mic icon next to the chat input. Speak, then click again to stop. The transcript is added to the input field — review it and hit Send.
+```
+User → index.html → POST /api/chat → OpenAI → { reply, readyForApproval } → UI
+```
 
----
-
-## Troubleshooting
-
-**"I don't have a company profile loaded"** — Go to *Data Sources* and paste your company context first.
-
-**Chat returns no response / error** — Make sure the backend server is running (`node server.js` in the `backend/` folder).
-
-**Voice doesn't work** — Check that your browser has microphone access (browser → site settings → microphone). Also confirm `OPENAI_API_KEY` is set correctly in `.env`.
-
-**API quota error** — The app will fall back to a mock response if the OpenAI API key is missing or over quota. The mock shows example data so you can explore the UI without a key.
+When the conversation reaches a natural completion point, the backend returns `readyForApproval: true`, which triggers the "Generate Team Brief" button in the UI.
 
 ---
 
-## Project background
+## Replacing the backend with your own agents
 
-Co-Steer was developed as part of a collaborative project exploring AI tools for executive teams. This MVP validates the core weekly steering loop: context → conversation → brief.
+This is the core handoff. If you want Co-Steer to call your own agents (bookkeeping, content, whatever), you don't need to touch `index.html`. You just need to serve the same API contract below.
+
+The frontend uses relative API paths (`/api/...`), so it always talks to whatever server is hosting it. If you run your backend on a different port, serve `index.html` from that server and the paths will follow automatically.
+
+### Endpoints
+
+**`GET /api/context`**
+
+Returns the stored company profile.
+
+```json
+{ "profile": "string or null" }
+```
+
+If no profile has been uploaded yet, return `{ "profile": null }`.
+
+---
+
+**`POST /api/context/upload`**
+
+Receives a multipart form upload with a field named `file` (a `.md` file). Store the content as the company profile for use in chat.
+
+No specific response shape required — the UI just checks for a non-error status.
+
+---
+
+**`POST /api/chat`**
+
+This is the main endpoint. Body:
+
+```json
+{
+  "message": "string",
+  "history": [
+    { "role": "user", "content": "..." },
+    { "role": "assistant", "content": "..." }
+  ]
+}
+```
+
+The frontend sends the full conversation history on every call. Your backend receives this and can route it to whatever agent handles weekly planning.
+
+Required response shape:
+
+```json
+{
+  "reply": "string",
+  "readyForApproval": false
+}
+```
+
+Two behaviors to preserve:
+
+- If no company profile is loaded when a message arrives, return `{ "requiresContext": true }`. The UI will interrupt the conversation and prompt the user to upload their company context.
+- When the conversation has reached a point where priorities are confirmed and it makes sense to generate a brief, return `"readyForApproval": true`. This surfaces the "Generate Team Brief" / "Make Adjustments" buttons in the UI.
+
+---
+
+**`POST /api/briefs/generate`**
+
+Body: `{ "history": [...] }` — the full conversation history.
+
+Generate a team brief from the conversation and store it. Return the brief content in whatever shape you prefer — the UI will display whatever comes back.
+
+---
+
+**`GET /api/briefs/team`**
+
+Returns an array of previously generated briefs. These appear in the Objectives view.
+
+```json
+[
+  { "id": "...", "content": "...", "createdAt": "..." }
+]
+```
+
+---
+
+**`POST /api/reset`**
+
+Resets all state (company profile, briefs, conversation) to a clean slate. Useful during testing. No specific response shape required.
+
+---
+
+**`POST /api/transcribe`**
+
+Receives a multipart form upload with a field named `audio`. Transcribes the audio and returns:
+
+```json
+{ "text": "transcribed text here" }
+```
+
+This is optional — voice input only works if this endpoint is live. If you skip it, the mic button in the UI will fail silently.
+
+---
+
+## Sample company context
+
+A file called `sample_company_context.md` is included in the repo. It shows the format the AI expects: company description, team structure, current priorities, and any context that helps the Chief of Staff give relevant responses. Use it as a starting point or replace it entirely.
+
+---
+
+## Notes
+
+- Voice input requires a valid `OPENAI_API_KEY` in your `.env` — it calls Whisper directly. If the key is missing or invalid, the rest of the app still works, just without voice.
+- `POST /api/reset` clears everything including the company profile. Useful for testing a clean run, but don't hit it in production by accident.
+- The `db.json` file is auto-created in `backend/data/` on first run. If you want a fresh start manually, just delete it.
+
+---
+
+## Support
+
+If you run into anything while building your own backend — questions about the API contract, something behaving unexpectedly in the UI, or you want to talk through how to wire in your existing agents — reach out to Daniel. Happy to help during implementation.

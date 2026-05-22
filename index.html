@@ -553,6 +553,22 @@
             filter: grayscale(0);
         }
 
+        .nav-item.locked {
+            opacity: 0.45;
+            pointer-events: none;
+            cursor: default;
+            position: relative;
+        }
+        .nav-item.locked::after {
+            content: '🔒';
+            font-size: 0.75rem;
+            margin-left: 4px;
+            opacity: 0.7;
+            position: static;
+            top: auto;
+            right: auto;
+        }
+
         /* SVG Icons */
         svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
@@ -565,19 +581,19 @@
             <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             SayItOnce
         </div>
-        <div class="nav-item active" data-view="dashboard">
+        <div class="nav-item locked" data-view="dashboard">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             Dashboard
         </div>
-        <div class="nav-item" data-view="chats">
+        <div class="nav-item locked" data-view="chats">
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             Chats & History
         </div>
-        <div class="nav-item" data-view="workflows">
+        <div class="nav-item active" data-view="workflows">
             <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
             Workflows
         </div>
-        <div class="nav-item" data-view="data-sources">
+        <div class="nav-item locked" data-view="data-sources">
             <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
             Data Sources
         </div>
@@ -585,7 +601,7 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
             Objectives & Tasks
         </div>
-        <div class="nav-item" data-view="company-info">
+        <div class="nav-item locked" data-view="company-info">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
             Company Info
         </div>
@@ -598,7 +614,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- Dashboard View -->
-        <div id="dashboard" class="view active">
+        <div id="dashboard" class="view">
             <header class="header">
                 <h1>Welcome back, CEO</h1>
                 <p>Here is what you can do today.</p>
@@ -696,7 +712,7 @@
         </div>
 
         <!-- Workflows View -->
-        <div id="workflows" class="view">
+        <div id="workflows" class="view active">
             <header class="header">
                 <h1>Workflows Manager</h1>
                 <p>Run, manage, and automate your company processes.</p>
@@ -746,72 +762,28 @@
         <!-- Objectives View -->
         <div id="objectives" class="view">
             <header class="header">
-                <h1>Objectives & Priorities</h1>
-                <p>Track your weekly loop outputs, monthly goals, and personal leadership tasks.</p>
+                <h1>Outputs & Briefs</h1>
+                <p>Generated briefs from your weekly loop appear here.</p>
             </header>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; flex: 1;">
-                
-                <!-- Weekly Column -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex: 1;">
+
+                <!-- Generated Briefs Column -->
                 <div class="glass" style="padding: 1.5rem; display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
-                        <span>This Week</span>
-                        <span style="font-size: 0.8rem; background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 12px;">3 Tasks</span>
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem;">
+                        This Week
                     </h3>
-                    
                     <div id="team-briefs-container" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div class="message" style="color: var(--text-muted);">Fetching briefs...</div>
+                        <div class="message" style="color: var(--text-muted);">No briefs yet. Complete a weekly loop to generate one.</div>
                     </div>
                 </div>
 
-                <!-- Monthly Column -->
-                <div class="glass" style="padding: 1.5rem; display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; color: var(--accent-1);">
-                        <span>This Month</span>
-                        <span style="font-size: 0.8rem; background: rgba(192, 132, 252, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; color: var(--text-main);">2 Objectives</span>
+                <!-- Roadmap Column -->
+                <div class="glass" style="padding: 1.5rem; display: flex; flex-direction: column; background: rgba(0,0,0,0.2); opacity: 0.5;">
+                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--text-muted);">
+                        Monthly & Personal
                     </h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div class="glass" style="padding: 1rem; background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent-1); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                            <div style="font-weight: 500; margin-bottom: 0.5rem; font-size: 0.95rem;">Hire VP of Engineering</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                                <span>Strategic</span>
-                                <span style="color: #fbbf24;">In Progress</span>
-                            </div>
-                        </div>
-                        <div class="glass" style="padding: 1rem; background: rgba(255,255,255,0.02); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                            <div style="font-weight: 500; margin-bottom: 0.5rem; font-size: 0.95rem;">Launch "SayItOnce" MVP</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                                <span>Product</span>
-                                <span>Pending</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Personal Column -->
-                <div class="glass" style="padding: 1.5rem; display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; color: var(--accent-2);">
-                        <span>Personal Leadership</span>
-                        <span style="font-size: 0.8rem; background: rgba(56, 189, 248, 0.1); padding: 0.2rem 0.5rem; border-radius: 12px; color: var(--text-main);">2 Tasks</span>
-                    </h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div class="glass" style="padding: 1rem; background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent-2); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                            <div style="font-weight: 500; margin-bottom: 0.5rem; font-size: 0.95rem;">Read "High Output Management"</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                                <span>Growth</span>
-                                <span style="color: #22c55e;">Done</span>
-                            </div>
-                        </div>
-                        <div class="glass" style="padding: 1rem; background: rgba(255,255,255,0.02); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                            <div style="font-weight: 500; margin-bottom: 0.5rem; font-size: 0.95rem;">Update Context Window</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-                                <span>Routine</span>
-                                <span style="color: #fbbf24;">In Progress</span>
-                            </div>
-                        </div>
-                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Connect your backend to populate monthly objectives and personal leadership tasks.</p>
                 </div>
 
             </div>
@@ -1021,7 +993,7 @@
             existingBtns.forEach(btn => btn.remove());
 
             try {
-                const res = await fetch('http://localhost:3000/api/chat', {
+                const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message, history: chatHistory })
@@ -1072,7 +1044,7 @@
             generateBtn.addEventListener('click', async () => {
                 generateBtn.innerText = "Generating...";
                 try {
-                    const res = await fetch('http://localhost:3000/api/briefs/generate', {
+                    const res = await fetch('/api/briefs/generate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ history: chatHistory })
@@ -1126,7 +1098,7 @@
                     formData.append('file', e.target.files[0]);
                     uploadBtn.innerText = "Uploading...";
                     try {
-                        await fetch('http://localhost:3000/api/context/upload', { method: 'POST', body: formData });
+                        await fetch('/api/context/upload', { method: 'POST', body: formData });
                         btnContainer.remove();
                         fetchCompanyContext();
                         appendMessage("Context uploaded successfully. Let's start the week.", true);
@@ -1191,7 +1163,7 @@
                     formData.append('file', e.target.files[0]);
                     uploadContextBtn.innerText = "Uploading...";
                     try {
-                        const res = await fetch('http://localhost:3000/api/context/upload', {
+                        const res = await fetch('/api/context/upload', {
                             method: 'POST',
                             body: formData
                         });
@@ -1221,7 +1193,7 @@
         // Fetch Team Briefs
         const fetchTeamBriefs = async () => {
             try {
-                const res = await fetch('http://localhost:3000/api/briefs/team');
+                const res = await fetch('/api/briefs/team');
                 const briefs = await res.json();
                 const container = document.getElementById('team-briefs-container');
                 if(container) {
@@ -1242,7 +1214,7 @@
 
         const fetchCompanyContext = async () => {
             try {
-                const res = await fetch('http://localhost:3000/api/context');
+                const res = await fetch('/api/context');
                 const data = await res.json();
                 const rawContext = document.getElementById('raw-company-context');
                 if(rawContext && data.profile) {
@@ -1284,7 +1256,7 @@
                             formData.append('audio', blob, `recording.${ext}`);
                             micBtn.style.color = '#fbbf24';
                             try {
-                                const res = await fetch('http://localhost:3000/api/transcribe', { method: 'POST', body: formData });
+                                const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
                                 const data = await res.json();
                                 if (data.text) {
                                     chatInput.value = (chatInput.value ? chatInput.value + ' ' : '') + data.text;
