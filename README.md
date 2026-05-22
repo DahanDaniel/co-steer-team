@@ -40,7 +40,7 @@ This repo gives you the working reference implementation. The backend uses OpenA
 
 5. **Open the app**
 
-   Go to [http://localhost:3000](http://localhost:3000) in your browser. The server serves the UI — no need to open the HTML file directly.
+   Go to [http://localhost:3000](http://localhost:3000) in your browser. The server serves the UI from the `frontend/` folder — no need to open any HTML file directly.
 
 ---
 
@@ -68,7 +68,7 @@ When the conversation reaches a natural completion point, the backend returns `r
 
 This is the core handoff. If you want Co-Steer to call your own agents (bookkeeping, content, whatever), you don't need to touch `index.html`. You just need to serve the same API contract below.
 
-The frontend uses relative API paths (`/api/...`), so it always talks to whatever server is hosting it. If you run your backend on a different port, serve `index.html` from that server and the paths will follow automatically.
+The frontend lives in `frontend/` and uses relative API paths (`/api/...`), so it always talks to whatever server is hosting it. The backend serves `frontend/` as static files. If you run your own backend on a different port, just serve the `frontend/` directory as static content and all API calls will route correctly.
 
 ### Endpoints
 
