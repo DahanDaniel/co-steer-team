@@ -170,7 +170,7 @@ A file called `sample_company_context.md` is included in the repo. It shows the 
 
 ## Notes
 
-- Voice input requires a valid `OPENAI_API_KEY` in your `.env` — it calls Whisper directly. If the key is missing or invalid, the rest of the app still works, just without voice.
+- **Voice input is not functional in this build.** The mic button is visible but locked. The infrastructure is in place (`/api/transcribe` backed by Whisper), but browser microphone permission handling and audio MIME type compatibility across environments made it unreliable enough to disable for this handoff. If you want to enable it for your own backend, implement `/api/transcribe` to accept a multipart `audio` field and return `{ "text": "..." }`.
 - `POST /api/reset` clears everything including the company profile. Useful for testing a clean run, but don't hit it in production by accident.
 - The `db.json` file is auto-created in `backend/data/` on first run. If you want a fresh start manually, just delete it.
 

@@ -91,7 +91,7 @@ const chatWidget = document.getElementById('chat-widget');
 
                 navItems.forEach(n => n.classList.remove('active'));
                 item.classList.add('active');
-                
+
                 views.forEach(v => {
                     if(v.id === targetView) {
                         v.classList.add('active');
@@ -99,6 +99,8 @@ const chatWidget = document.getElementById('chat-widget');
                         v.classList.remove('active');
                     }
                 });
+
+                if (targetView === 'objectives') fetchTeamBriefs();
                 
                 if (chatWidget.classList.contains('chat-fullscreen')) {
                     chatWidget.classList.remove('chat-fullscreen');
@@ -638,52 +640,3 @@ const chatWidget = document.getElementById('chat-widget');
         // Initial fetch
         fetchTeamBriefs();
         fetchCompanyContext();
-        // Voice input
-        const micBtn = document.getElementById('mic-btn');
-        let mediaRecorder = null;
-        let audioChunks = [];
-
-        if (micBtn) {
-            micBtn.addEventListener('click', async () => {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                    return;
-                }
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                        ? 'audio/webm;codecs=opus'
-                        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
-                    mediaRecorder = new MediaRecorder(stream, { mimeType });
-                    audioChunks = [];
-
-                    micBtn.style.background = 'rgba(239, 68, 68, 0.6)';
-
-                    mediaRecorder.addEventListener('dataavailable', e => audioChunks.push(e.data));
-                    mediaRecorder.addEventListener('stop', async () => {
-                        micBtn.style.background = 'rgba(255,255,255,0.05)';
-                        stream.getTracks().forEach(t => t.stop());
-
-                        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-                        const ext = mediaRecorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
-                        const formData = new FormData();
-                        formData.append('audio', blob, `recording.${ext}`);
-
-                        try {
-                            const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
-                            const data = await res.json();
-                            if (data.text) {
-                                chatInput.value = (chatInput.value ? chatInput.value + ' ' : '') + data.text;
-                                chatInput.focus();
-                            }
-                        } catch (err) {
-                            console.error('Transcription failed:', err);
-                        }
-                    });
-
-                    mediaRecorder.start();
-                } catch (err) {
-                    console.error('Mic access denied:', err);
-                }
-            });
-        }
